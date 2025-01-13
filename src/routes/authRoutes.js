@@ -4,7 +4,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 
-const JWT_SECRET = process.env.JWT_SECRET ;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-default-secret';
 
 router.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
@@ -34,11 +34,58 @@ router.post('/register', async (req, res) => {
                     id: newUser._id,
                     username: newUser.username,
                     email: newUser.email,
+                    password: newUser.password,
                 },
             });
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 });
+
+// router.post('/login', async (req, res) => {
+//     const { email, password } = req.body;
+
+//     try {
+//         console.log("Login Attempt:", { email, password }); // Debugging
+
+//         const user = await User.findOne({ email });
+//         if (!user) {
+//             console.error("User not found:", email);
+//             return res.status(404).json({ message: 'User not found' });
+//         }
+
+//         console.log("User found:", user);
+
+//         const isPasswordValid = await bcrypt.compare(password, user.password);
+//         console.log("Password Valid:", isPasswordValid);
+
+//         if (!isPasswordValid) {
+//             return res.status(401).json({ message: 'Invalid credentials' });
+//         }
+
+//         const token = jwt.sign(
+//             { id: user._id, email: user.email },
+//             JWT_SECRET,
+//             { expiresIn: '1h' }
+//         );
+//         console.log("JWT Token Generated:", token);
+
+//         res.status(200)
+//             .set('Authorization', `Bearer ${token}`)
+//             .json({
+//                 message: 'Login successful',
+//                 token,
+//                 user: {
+//                     id: user._id,
+//                     username: user.username,
+//                     email: user.email
+//                 }
+//             });
+//     } catch (err) {
+//         console.error("Server Error:", err.message);
+//         res.status(500).json({ message: 'Server error', error: err.message });
+//     }
+// });
+
 
 module.exports = router;
