@@ -42,50 +42,43 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// router.post('/login', async (req, res) => {
-//     const { email, password } = req.body;
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
 
-//     try {
-//         console.log("Login Attempt:", { email, password }); // Debugging
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            console.error("User not found:", email);
+            return res.status(404).json({ message: 'User not found' });
+        }
 
-//         const user = await User.findOne({ email });
-//         if (!user) {
-//             console.error("User not found:", email);
-//             return res.status(404).json({ message: 'User not found' });
-//         }
+        const isPasswordValid = await bcrypt.hash(password, user.password);
 
-//         console.log("User found:", user);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
 
-//         const isPasswordValid = await bcrypt.compare(password, user.password);
-//         console.log("Password Valid:", isPasswordValid);
+        const token = jwt.sign(
+            { id: user._id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
 
-//         if (!isPasswordValid) {
-//             return res.status(401).json({ message: 'Invalid credentials' });
-//         }
-
-//         const token = jwt.sign(
-//             { id: user._id, email: user.email },
-//             JWT_SECRET,
-//             { expiresIn: '1h' }
-//         );
-//         console.log("JWT Token Generated:", token);
-
-//         res.status(200)
-//             .set('Authorization', `Bearer ${token}`)
-//             .json({
-//                 message: 'Login successful',
-//                 token,
-//                 user: {
-//                     id: user._id,
-//                     username: user.username,
-//                     email: user.email
-//                 }
-//             });
-//     } catch (err) {
-//         console.error("Server Error:", err.message);
-//         res.status(500).json({ message: 'Server error', error: err.message });
-//     }
-// });
+        res.status(200)
+            .set('Authorization', `Bearer ${token}`)
+            .json({
+                message: 'Login successful',
+                user: {
+                    id: user._id,
+                    username: user.username,
+                    email: user.email
+                }
+            });
+    } catch (err) {
+        console.error("Server Error:", err.message);
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+});
 
 
 module.exports = router;
