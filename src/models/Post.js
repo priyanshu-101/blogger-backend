@@ -1,6 +1,6 @@
-const moongose = require('mongoose');
+const mongoose = require('mongoose');
 
-const PostSchema = new moongose.Schema({
+const PostSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
@@ -10,7 +10,8 @@ const PostSchema = new moongose.Schema({
         required: true,
     },
     author: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'User',
         required: true,
     },
     tags: {
@@ -21,4 +22,4 @@ const PostSchema = new moongose.Schema({
     },
 }, { timestamps: true });
 
-module.exports = moongose.model('Post', PostSchema);
+module.exports = mongoose.model('Post', PostSchema);
