@@ -5,6 +5,7 @@ const connectDB = require('./src/config/db');
 const authRoutes = require('./src/routes/authRoutes');
 const User = require('./src/routes/userRoutes');
 const post = require('./src/routes/postRoutes');
+const comment = require('./src/routes/commentRoutes');
 
 dotenv.config(); 
 
@@ -18,6 +19,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use('/api/auth', authRoutes);
 app.use('/api/user', User);
 app.use('/api/post', post);
+app.use('/api/comment', comment);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
