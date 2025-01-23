@@ -35,6 +35,28 @@ router.get('/userprofile', authenticateToken, async (req, res) => {
     }
 });
 
+router.put('/userprofile/:id', authenticateToken, async (req, res) => {
+    const { id } = req.params;
+    const { username, email } = req.body;
+
+    try {
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        if (req?.params?.id !== id) {
+            return res.status(403).json({ message: 'Access Denied. Unauthorized.' });
+        }
+        user.username = username || user.username;
+        user.email = email || user.email;
+        await user.save();
+        res.status(200).json({ user });
+    } catch (error) {
+        console.error('Error updating user profile:', error.message);
+        res.status(500).json({ message: 'Server error.' });
+    }
+}
+);
 
 router.delete('/userprofile/:id', authenticateToken, async (req, res) => {
     const { id } = req.params;
