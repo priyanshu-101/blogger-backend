@@ -1,17 +1,26 @@
 const jwt = require('jsonwebtoken');
 
 const authenticateToken = (req, res, next) => {
-  const token = req.header('Authorization');
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1]; 
+
+
   if (!token) {
-    return res.status(401).json({ message: 'Access denied. No token provided.' });
+    return res.status(401).json({ error: 'Access denied. No token provided.' });
   }
 
   try {
-    const decoded = jwt.sign(token, process.env.JWT_SECRET);
+    const decoded = jwt.decode(token);
+    console.log('Decoded Token:', decoded);
+
+    if (!decoded) {
+      return res.status(403).json({ error: 'Invalid token format.' });
+    }
     req.user = decoded; 
-    next();
-  } catch (error) {
-    res.status(400).json({ message: 'Invalid token.' });
+    next(); 
+  } catch (err) {
+    console.error('Token Decoding Error:', err.message);
+    res.status(403).json({ error: 'Invalid token.' });
   }
 };
 
