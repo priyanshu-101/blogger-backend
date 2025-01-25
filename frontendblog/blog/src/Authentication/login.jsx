@@ -26,12 +26,13 @@ const Login = () => {
     if (validateForm()) {
       try {
         const response = await loginuser(email, password);
+        console.log(response);
         if (response) {
           if (response.status === 200) {
             localStorage.setItem("accessToken", response.data.token);
             localStorage.setItem("user", JSON.stringify(response.data.user));
   
-            navigate("/home");
+            navigate(`/home/${response?.data?.user?.id}`);
           }
         }
       } catch (err) {
