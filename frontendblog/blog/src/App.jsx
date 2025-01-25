@@ -1,12 +1,19 @@
 import React from "react";
-import  Register  from "./Authentication/register";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; 
+import Register from "./Authentication/Register"; 
+import Login from "./Authentication/login";
+import Home from "./components/Home";
 
-export default function App() {
+const App = () => {
   return (
-    <div className="text-center">
-      <div>
-        <Register />
-      </div>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/home" element={<Home />} /> 
+        <Route path="/register" element={<Register />} /> 
+        <Route path="/login" element={<Login />} /> 
+      </Routes>
+    </Router>
   );
-}
+};
+
+export default App;
