@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { registeruser } from "../api/authapi";
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import Header from "../components/Header";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -8,6 +10,7 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false); 
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors = {};
@@ -23,7 +26,10 @@ const Register = () => {
     e.preventDefault();
     if (validateForm()) {
       try {
-        await registeruser(name, email, password);
+       const response = await registeruser(name, email, password);
+        if(response ) {
+        navigate("/login");
+        }
       } catch (err) {
         console.log(err);
       }
@@ -31,6 +37,8 @@ const Register = () => {
   };
 
   return (
+    <div className="bg-gray-100 min-h-screen flex flex-col">
+    <Header />
     <div className="flex items-center justify-center min-h-screen bg-black">
       <div className="bg-white shadow-2xl rounded-2xl w-full max-w-sm p-8 space-y-6">
         <h1 className="text-3xl font-bold text-center">Register</h1>
@@ -97,12 +105,13 @@ const Register = () => {
           </button>
           <div className="text-center mt-4">
             <a href="/login" className="text-sm text-gray-600 hover:text-blue-600">
-              Or Sign In
+              Or Log In
             </a>
           </div>
         </form>
       </div>
     </div>
+  </div>
   );
 };
 
