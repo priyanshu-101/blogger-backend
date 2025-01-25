@@ -20,6 +20,11 @@ const PostSchema = new mongoose.Schema({
     image: {
         type: String,
     },
+    privacy: {
+        type: String,
+        enum: ["friends-only", "public"],
+        default: 'public',
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Post', PostSchema);
