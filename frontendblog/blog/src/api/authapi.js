@@ -21,21 +21,38 @@ export const registeruser = async (name, email, password) => {
     }
 }
 
-// export const fetchMaintainanceServices = async (hotelId, name) => {
-//     try {
-//         const token = localStorage.getItem("accessToken");
-//         const payload =
-//         {
-//             "hXipperId": hotelId,
-//             "serviceName": name,
-//         }
-//         const response = await axios.post(`${BASE_URL}/user/hotel/services/getMaintenanceItems`, payload, {
-//             headers: {
-//                 Authorization: `Bearer ${token}`,
-//             },
-//         });
-//         return response.data;
-//     } catch (err) {
-//         return err.response;
-//     }
-// }
+export const loginuser = async (email, password) => {
+    try {
+        const token = localStorage.getItem("accessToken");
+        const payload =
+            {
+                "email": email,
+                "password": password
+            }
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/auth/login`, payload, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response;
+    } catch (error) {
+        return error.response.data;
+    }
+}
+
+export const logoutuser = async (email) => {
+    try {
+        const token = localStorage.getItem("accessToken");
+        const payload = {
+            "email":email,
+        }
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/auth/logout`, payload, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response;
+    } catch (error) {
+        return error.response.data;
+    }
+}
