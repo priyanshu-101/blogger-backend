@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { MoreVertical, ChevronDown } from "lucide-react";
+import { MoreVertical, ChevronDown, Menu, X } from "lucide-react";
 import { logoutuser } from "../api/authapi";
 import Loader from "../spinner/Loader";
 
@@ -8,16 +8,15 @@ const Header = () => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
-    const toggleDropdown = () => {
-        setDropdownOpen(!dropdownOpen);
-    };
-
-    const toggleUserDropdown = () => {
-        setUserDropdownOpen(!userDropdownOpen);
+    const toggleMobileMenu = () => {
+        setMobileMenuOpen(!mobileMenuOpen);
+        setDropdownOpen(false);
+        setUserDropdownOpen(false);
     };
 
     const handleLogout = async () => {
@@ -33,8 +32,45 @@ const Header = () => {
             console.error("Logout failed:", err);
         } finally {
             setLoading(false); 
+            setMobileMenuOpen(false);
         }
     };
+
+    const MobileNavLinks = () => (
+        <div className="md:hidden fixed inset-0 bg-blue-600 z-50 flex flex-col">
+            <div className="flex justify-between p-4">
+                <div className="text-2xl font-semibold">MyApp</div>
+                <button onClick={toggleMobileMenu} className="text-white">
+                    <X className="w-6 h-6" />
+                </button>
+            </div>
+            <nav className="flex flex-col p-4 space-y-4">
+                {storedUser ? (
+                    <>
+                        <Link to="/" onClick={toggleMobileMenu} className="text-white text-xl">Home</Link>
+                        <Link to="/all" onClick={toggleMobileMenu} className="text-white text-xl">All Post</Link>
+                        <Link to="/create" onClick={toggleMobileMenu} className="text-white text-xl">Create Post</Link>
+                        <Link to="/profile" onClick={toggleMobileMenu} className="text-white text-xl">Profile</Link>
+                        <Link to="/post" onClick={toggleMobileMenu} className="text-white text-xl">Post</Link>
+                        <button 
+                            onClick={handleLogout} 
+                            className="text-white text-xl text-left"
+                        >
+                            Logout
+                        </button>
+                    </>
+                ) : (
+                    <>
+                        <Link to="/login" onClick={toggleMobileMenu} className="text-white text-xl">Home</Link>
+                        <Link to="/login" onClick={toggleMobileMenu} className="text-white text-xl">All Post</Link>
+                        <Link to="/login" onClick={toggleMobileMenu} className="text-white text-xl">Create Post</Link>
+                        <Link to="/register" onClick={toggleMobileMenu} className="text-white text-xl">Register</Link>
+                        <Link to="/login" onClick={toggleMobileMenu} className="text-white text-xl">Login</Link>
+                    </>
+                )}
+            </nav>
+        </div>
+    );
 
     return (
         <>
@@ -43,6 +79,8 @@ const Header = () => {
                     <Loader />
                 </div>
             )}
+
+            {mobileMenuOpen && <MobileNavLinks />}
 
             <header className="bg-blue-600 text-white p-4 shadow-md">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
@@ -94,9 +132,9 @@ const Header = () => {
                         </ul>
 
                         {storedUser ? (
-                            <div className="relative">
+                            <div className="relative hidden md:block">
                                 <button
-                                    onClick={toggleUserDropdown}
+                                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                                     className="flex items-center space-x-2 text-white focus:outline-none"
                                 >
                                     <span>{storedUser?.username}</span>
@@ -110,7 +148,7 @@ const Header = () => {
                                                 <Link
                                                     to="/profile"
                                                     className="block px-4 py-2 text-sm hover:bg-blue-100 rounded-lg"
-                                                    onClick={() => setUserDropdownOpen(false)} // Close the menu when a link is clicked
+                                                    onClick={() => setUserDropdownOpen(false)} 
                                                 >
                                                     Profile
                                                 </Link>
@@ -123,14 +161,23 @@ const Header = () => {
                                                     Logout
                                                 </button>
                                             </li>
+                                            <li>
+                                                <Link
+                                                    to="/post"
+                                                    className="block px-4 py-2 text-sm hover:bg-blue-100 rounded-lg"
+                                                    onClick={() => setUserDropdownOpen(false)} 
+                                                >
+                                                    Post
+                                                </Link>
+                                            </li>
                                         </ul>
                                     </div>
                                 )}
                             </div>
                         ) : (
-                            <div className="relative">
+                            <div className="relative hidden md:block">
                                 <button
-                                    onClick={toggleDropdown}
+                                    onClick={() => setDropdownOpen(!dropdownOpen)}
                                     className="text-white focus:outline-none"
                                 >
                                     <MoreVertical className="w-6 h-6" />
@@ -162,6 +209,15 @@ const Header = () => {
                                 )}
                             </div>
                         )}
+
+                        <div className="md:hidden">
+                            <button 
+                                onClick={toggleMobileMenu} 
+                                className="text-white focus:outline-none"
+                            >
+                                <Menu className="w-6 h-6" />
+                            </button>
+                        </div>
                     </nav>
                 </div>
             </header>
