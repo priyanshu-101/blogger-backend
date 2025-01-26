@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Bold, Italic, Underline, List, ListOrdered, Link, Quote, Code } from 'lucide-react';
 import { createPost } from '../api/post';
 import Loader from '../spinner/Loader';
+import Header from './Header';
 
 const CreatePost = () => {
     const [post, setPost] = useState({
@@ -94,6 +95,8 @@ const CreatePost = () => {
     };
 
     return (
+        <div>
+            <Header/>
         <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
             {loading && (
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -219,6 +222,7 @@ const CreatePost = () => {
                     )}
                 </div>
             </form>
+        </div>
         </div>
     );
 }

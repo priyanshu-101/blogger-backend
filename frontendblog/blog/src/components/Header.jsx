@@ -57,7 +57,7 @@ const Header = () => {
                             {storedUser ? (
                                 <>
                                     <li>
-                                        <Link to="/home" className="hover:text-blue-300 transition-colors">
+                                        <Link to="/" className="hover:text-blue-300 transition-colors">
                                             Home
                                         </Link>
                                     </li>
