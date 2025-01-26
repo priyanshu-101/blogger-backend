@@ -49,3 +49,17 @@ export const getPostbyid = async (id) => {
         return error.response.data;
     }
 }
+
+export const deletePost = async (id) => {
+    try {
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/api/post/postdelete/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response;
+    } catch (error) {
+        return error.response.data;
+    }
+}
