@@ -6,6 +6,7 @@ import Home from "./components/Home";
 import Profile from "./components/Profile";
 import AllPosts from "./components/AllPost";
 import CreatePost from "./components/CreatePost";
+import Post from "./components/Post";
 
 const App = () => {
   const storedUser = JSON.parse(localStorage.getItem("user"));
@@ -26,6 +27,7 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/all" element={<AllPosts />} />
         <Route path="/create" element={<CreatePost />} />
+        <Route path="/post" element={<Post />} />
       </Routes>
     </Router>
   );

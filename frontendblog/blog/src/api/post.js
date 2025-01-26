@@ -35,3 +35,17 @@ export const createPost = async (title, content, tags) => {
         return error.response.data;
     }
 }
+
+export const getPostbyid = async (id) => {
+    try {
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/post/post/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response;
+    } catch (error) {
+        return error.response.data;
+    }
+}
