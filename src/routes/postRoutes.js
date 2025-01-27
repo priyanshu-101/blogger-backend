@@ -70,7 +70,7 @@ router.get('/posts', authenticateToken, async (req, res) => {
 
 router.get('/post/:id', authenticateToken, async (req, res) => {
     try {
-        const posts = await Post.find({ author: req.user.id });
+        const posts = await Post.find({ author: req.params.id });
         if (posts.length === 0) {
             return res.status(404).send({ message: 'No posts found for this user' });
         }
