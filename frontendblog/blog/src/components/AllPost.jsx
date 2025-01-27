@@ -131,6 +131,8 @@ const AllPosts = () => {
   }
 
   return (
+    <div>
+        <Header/>
     <div className="max-w-7xl mx-auto p-6">
       {loading && (
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -246,6 +248,7 @@ const AllPosts = () => {
           Next
         </button>
       </div>
+    </div>
     </div>
   );
 };
