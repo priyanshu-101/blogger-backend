@@ -11,6 +11,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const storedUser = JSON.parse(localStorage.getItem("user"));
 
   const navigate = useNavigate();
 
@@ -28,13 +29,11 @@ const Login = () => {
       try {
         setLoading(true); 
         const response = await loginuser(email, password);
-        if (response) {
           if (response.status === 200) {
             localStorage.setItem("accessToken", response.data.token);
             localStorage.setItem("user", JSON.stringify(response.data.user));
             navigate(`/home/${response?.data?.user?.id}`);
           }
-        }
       } catch (err) {
         console.log(err);
       } finally {
