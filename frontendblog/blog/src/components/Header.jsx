@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MoreVertical, ChevronDown, Menu, X } from "lucide-react";
 import { logoutuser } from "../api/authapi";
+import { removeuser } from "../api/user";
 import Loader from "../spinner/Loader";
 
 const Header = () => {
@@ -36,6 +37,23 @@ const Header = () => {
         }
     };
 
+    const handleDelete = async () => {
+        try {
+            setLoading(true);
+            const response = await removeuser(storedUser?.id);
+            if (response && response.status === 200) {
+                localStorage.removeItem("user");
+                localStorage.removeItem("accessToken");
+                navigate("/register");
+            }
+        } catch (err) {
+            console.error("Delete failed:", err);
+        } finally {
+            setLoading(false);
+            setMobileMenuOpen(false);
+        }
+    };
+
     const MobileNavLinks = () => (
         <div className="md:hidden fixed inset-0 bg-blue-600 z-50 flex flex-col">
             <div className="flex justify-between p-4">
@@ -57,6 +75,12 @@ const Header = () => {
                             className="text-white text-xl text-left"
                         >
                             Logout
+                        </button>
+                        <button
+                            onClick={handleDelete}
+                            className="text-white text-xl text-left"
+                        >
+                            Delete
                         </button>
                     </>
                 ) : (
@@ -169,6 +193,14 @@ const Header = () => {
                                                 >
                                                     Post
                                                 </Link>
+                                            </li>
+                                            <li>
+                                                <button
+                                                    onClick={handleDelete}
+                                                    className="block w-full text-left px-4 py-2 text-sm hover:bg-blue-100 rounded-lg"
+                                                >
+                                                    Delete
+                                                </button>
                                             </li>
                                         </ul>
                                     </div>

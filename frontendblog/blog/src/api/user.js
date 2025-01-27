@@ -18,3 +18,18 @@ export const updateuser = async ( email, password , id) => {
         return error.response.data;
     }
 }
+
+export const removeuser = async (id) => {
+    try {
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/api/user/userprofile/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response;
+    }
+    catch (error) {
+        return error.response.data;
+    }
+}
