@@ -8,7 +8,8 @@ const post = require('./src/routes/postRoutes');
 const comment = require('./src/routes/commentRoutes');
 const request = require('./src/routes/requestRoutes');
 const privacy = require('./src/routes/privacyRoutes');
-const cors = require('cors'); // Import the CORS package
+const otpRoutes = require('./src/routes/otpRoutes');
+const cors = require('cors'); 
 
 dotenv.config(); 
 
@@ -26,6 +27,7 @@ app.use('/api/post', post);
 app.use('/api/comment', comment);
 app.use('/api/request', request);
 app.use('/api/post', privacy);
+app.use('/api/otp', otpRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
