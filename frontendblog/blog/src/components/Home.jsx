@@ -1,4 +1,5 @@
 import Header from "./Header";
+import Footer from "./Footer";
 
 const Home = () => {
     return (
@@ -7,6 +8,7 @@ const Home = () => {
             <div>
                 <h1 className="text-3xl font-bold text-center mt-10">Home</h1>
             </div>
+            <Footer />
         </div>
     );
 }

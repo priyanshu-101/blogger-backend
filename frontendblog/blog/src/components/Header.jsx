@@ -119,7 +119,7 @@ const Header = () => {
                             {storedUser ? (
                                 <>
                                     <li>
-                                        <Link to="/" className="hover:text-blue-300 transition-colors">
+                                        <Link to={`/home/${storedUser?.id}`} className="hover:text-blue-300 transition-colors">
                                             Home
                                         </Link>
                                     </li>
