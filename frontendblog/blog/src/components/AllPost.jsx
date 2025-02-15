@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { getPosts } from "../api/post";
 import { FaRegComment, FaRegThumbsUp } from "react-icons/fa";
 import { createComments, getComment } from "../api/comment";
+import { likepost } from "../api/likeapi";
 import Header from "./Header";
 import Loader from "../spinner/Loader";
 
@@ -15,6 +16,7 @@ const AllPosts = () => {
   const [commentText, setCommentText] = useState("");
   const [allComments, setAllComments] = useState({});
   const postsPerPage = 10;
+  const storedUser = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -35,6 +37,24 @@ const AllPosts = () => {
 
     fetchPosts();
   }, []);
+
+  const handleLikeClick = async (postId) => {
+    try {
+      setLoading(true);
+      console.log(storedUser?.id);
+      console.log(postId, storedUser?.id);
+      const response = await likepost(postId, storedUser?.id);
+      if (response) {
+        alert(response.data?.message);
+        await refreshPosts();
+      }
+    } catch (error) {
+      console.error("Error liking post:", error);
+      alert("An error occurred while liking the post.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getcomments = async () => {
     try {
@@ -164,7 +184,7 @@ const AllPosts = () => {
               </Link>
 
               <div className="flex items-center space-x-6 text-gray-500 mt-4">
-                <div className="flex items-center space-x-1 cursor-pointer hover:text-blue-500">
+                <div className="flex items-center space-x-1 cursor-pointer hover:text-blue-500"  onClick={() => handleLikeClick(post._id)}>
                   <FaRegThumbsUp />
                   <span>Like</span>
                 </div>
