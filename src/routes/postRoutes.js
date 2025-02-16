@@ -117,4 +117,75 @@ router.put('/postupdate/:id', authenticateToken, async (req, res) => {
     }
 });
 
+router.get('/recommended/:id', authenticateToken, async (req, res) => {
+    try {
+        if (!req.params.id || !req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({ 
+                message: 'Invalid user ID format' 
+            });
+        }
+        const userPosts = await Post.find({ 
+            author: req.params.id,
+        })
+        .select('tags title'); 
+        const userTags = userPosts.reduce((tags, post) => {
+            const postTags = Array.isArray(post.tags) ? post.tags : 
+                           typeof post.tags === 'string' ? post.tags.split(',').map(tag => tag.trim()) :
+                           [];
+            return [...new Set([...tags, ...postTags])];
+        }, []);
+
+        if (userTags.length === 0) {
+            return res.status(404).json({
+                message: 'No tags found from user posts to base recommendations on',
+                debug: {
+                    postsFound: userPosts.length,
+                    rawTags: userPosts.map(post => post.tags)
+                }
+            });
+        }
+        const recommendations = await Post.find({
+            author: { $ne: req.params.id },
+            tags: { $in: userTags }
+        })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate('author', 'username avatar')
+        .select('title content tags createdAt');
+
+        if (!recommendations.length) {
+            return res.status(404).json({
+                message: 'No matching posts found',
+                debug: {
+                    searchedTags: userTags,
+                    postsChecked: await Post.countDocuments({ 
+                        author: { $ne: req.params.id }, 
+                    })
+                }
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            count: recommendations.length,
+            debug: {
+                userTagsFound: userTags,
+                totalUserPosts: userPosts.length
+            },
+            data: recommendations
+        });
+
+    } catch (error) {
+        console.error('Error in recommended posts:', error?.message, error?.stack);
+        return res.status(500).json({
+            message: 'Failed to fetch recommended posts',
+            error: process.env.NODE_ENV === 'development' ? {
+                message: error.message,
+                stack: error.stack
+            } : undefined
+        });
+    }
+});
+
 module.exports = router;
+
