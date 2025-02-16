@@ -1,30 +1,76 @@
 const express = require('express');
-const router = express.Router();
-const Post = require('../models/Post');
-const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const authenticateToken = require('../middleware/auth');
+const Post = require('../models/Post');
+const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-default-secret';
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadDir = 'uploads/';
 
-router.post('/posts', authenticateToken, async (req, res) => {
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        const ext = path.extname(file.originalname);
+        cb(null, 'post-' + uniqueSuffix + ext);
+    }
+});
+
+const fileFilter = (req, file, cb) => {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (allowedTypes.includes(file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Invalid file type. Only JPEG, PNG, GIF and WebP images are allowed.'), false);
+    }
+};
+
+const upload = multer({
+    storage: storage,
+    limits: {
+        fileSize: 5 * 1024 * 1024 
+    },
+    fileFilter: fileFilter
+});
+
+router.post('/posts', authenticateToken, upload.single('image'), async (req, res) => {
     try {
         const { title, content, tags } = req.body;
+
         if (!title || !content) {
+            if (req.file) {
+                fs.unlinkSync(req.file.path);
+            }
             return res.status(400).send({ message: 'Title and content are required' });
         }
+
         const post = new Post({
             title,
             content,
-            author: req.user.id, 
-            tags,
-        }); 
+            author: req.user.id,
+            tags: tags ? JSON.parse(tags) : [], 
+            image: req.file ? req.file.path : null, 
+            createdAt: new Date()
+        });
+
         await post.save();
         res.status(201).send(post);
     } catch (error) {
-        console.error(error);
+        if (req.file) {
+            fs.unlinkSync(req.file.path);
+        }
+        console.error('Error creating post:', error);
         res.status(500).send({ message: 'Server error' });
     }
 });
+
 
 router.get('/posts', authenticateToken, async (req, res) => {
     try {
@@ -101,8 +147,8 @@ router.put('/postupdate/:id', authenticateToken, async (req, res) => {
             return res.status(400).send({ message: 'No fields provided for update' });
         }
         const post = await Post.findOneAndUpdate(
-            { _id: req.params.id, author: req.user.id }, 
-            { $set: { title, content,tags } },
+            { _id: req.params.id, author: req.user.id },
+            { $set: { title, content, tags } },
             { new: true }
         );
 
@@ -120,18 +166,18 @@ router.put('/postupdate/:id', authenticateToken, async (req, res) => {
 router.get('/recommended/:id', authenticateToken, async (req, res) => {
     try {
         if (!req.params.id || !req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-            return res.status(400).json({ 
-                message: 'Invalid user ID format' 
+            return res.status(400).json({
+                message: 'Invalid user ID format'
             });
         }
-        const userPosts = await Post.find({ 
+        const userPosts = await Post.find({
             author: req.params.id,
         })
-        .select('tags title'); 
+            .select('tags title');
         const userTags = userPosts.reduce((tags, post) => {
-            const postTags = Array.isArray(post.tags) ? post.tags : 
-                           typeof post.tags === 'string' ? post.tags.split(',').map(tag => tag.trim()) :
-                           [];
+            const postTags = Array.isArray(post.tags) ? post.tags :
+                typeof post.tags === 'string' ? post.tags.split(',').map(tag => tag.trim()) :
+                    [];
             return [...new Set([...tags, ...postTags])];
         }, []);
 
@@ -148,18 +194,18 @@ router.get('/recommended/:id', authenticateToken, async (req, res) => {
             author: { $ne: req.params.id },
             tags: { $in: userTags }
         })
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .populate('author', 'username avatar')
-        .select('title content tags createdAt');
+            .sort({ createdAt: -1 })
+            .limit(5)
+            .populate('author', 'username avatar')
+            .select('title content tags createdAt');
 
         if (!recommendations.length) {
             return res.status(404).json({
                 message: 'No matching posts found',
                 debug: {
                     searchedTags: userTags,
-                    postsChecked: await Post.countDocuments({ 
-                        author: { $ne: req.params.id }, 
+                    postsChecked: await Post.countDocuments({
+                        author: { $ne: req.params.id },
                     })
                 }
             });
