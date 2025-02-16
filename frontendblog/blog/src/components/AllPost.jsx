@@ -78,7 +78,6 @@ const AllPosts = () => {
           [postId]: prev[postId] + (likedPosts[postId] ? -1 : 1)
         }));
         
-        alert(response.data?.message);
       }
     } catch (error) {
       console.error("Error liking post:", error);
