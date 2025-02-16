@@ -29,3 +29,14 @@ router.post("/like/:postId", authenticateToken, async (req, res) => {
 });
 
 module.exports = router;
+
+router.get("/like/:postId", async (req, res) => {
+  try {
+    const { postId } = req.params;
+
+    const likes = await Like.find({ post: postId });
+    return res.json({ likes: likes.length });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
