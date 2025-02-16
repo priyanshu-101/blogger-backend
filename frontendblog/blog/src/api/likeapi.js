@@ -17,3 +17,12 @@ export const likepost = async (postid,id) => {
         return error.response.data;
     }
 }
+
+export const getlikes = async (postid) => { 
+    try {
+        const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/like/${postid}`);
+        return response;
+    } catch (error) {
+        return error.response.data;
+    }
+}   
