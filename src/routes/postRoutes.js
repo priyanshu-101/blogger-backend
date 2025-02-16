@@ -29,7 +29,7 @@ router.post('/posts', authenticateToken, async (req, res) => {
 router.get('/posts', authenticateToken, async (req, res) => {
     try {
         const {
-            page = 2,
+            page = 1,
             limit = 10,
             author,
             tag,
