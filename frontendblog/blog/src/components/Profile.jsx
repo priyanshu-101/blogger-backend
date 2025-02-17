@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { updateuser } from "../api/user";
 import Loader from "../spinner/Loader";
+// import Breadcrumbs from "./BreadCrumbs";
 
 const Profile = () => {
-    const [user, setUser] = useState(null); 
-    const [loading, setLoading] = useState(false); 
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -19,15 +20,15 @@ const Profile = () => {
     }, [navigate]);
 
     const handleUpdate = async (e) => {
-        e.preventDefault(); 
+        e.preventDefault();
 
         try {
-            setLoading(true); 
+            setLoading(true);
             const response = await updateuser(user.email, user.password, user.id);
             if (response && response.status === 200) {
                 const updatedUser = response.data;
-                setUser(updatedUser); 
-                localStorage.setItem("user", JSON.stringify(updatedUser)); 
+                setUser(updatedUser);
+                localStorage.setItem("user", JSON.stringify(updatedUser));
                 alert("Profile updated successfully!");
             } else {
                 alert("Failed to update profile. Please try again.");
@@ -36,7 +37,7 @@ const Profile = () => {
             console.error("Error updating profile:", error);
             alert("An error occurred while updating the profile.");
         } finally {
-            setLoading(false); 
+            setLoading(false);
         }
     };
 
@@ -48,6 +49,7 @@ const Profile = () => {
                 </div>
             )}
             <Header />
+            {/* <Breadcrumbs /> */}
             <div className="flex flex-col items-center py-8">
                 <h1 className="text-3xl font-bold mb-6">Profile</h1>
                 {user ? (
