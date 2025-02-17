@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { FaRegComment, FaRegThumbsUp, FaThumbsUp, FaRegClock, FaImage } from "react-icons/fa";
 import { getPosts } from "../api/post";
-import { FaRegComment, FaRegThumbsUp, FaThumbsUp } from "react-icons/fa";
 import { createComments, getComment } from "../api/comment";
 import { likepost, getlikes } from "../api/likeapi";
 import Header from "./Header";
 import Loader from "../spinner/Loader";
+// import Breadcrumbs from "./BreadCrumbs";
 
 const AllPosts = () => {
   const [posts, setPosts] = useState([]);
@@ -26,7 +27,7 @@ const AllPosts = () => {
         setLoading(true);
         const response = await getPosts();
         const sortedPosts = response?.data?.posts.sort((a, b) => 
-          new Date(b.createdAt) - new Date(a.createdAt)
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         setPosts(sortedPosts);
         sortedPosts.forEach(post => {
@@ -77,8 +78,6 @@ const AllPosts = () => {
           ...prev,
           [postId]: prev[postId] + (likedPosts[postId] ? -1 : 1)
         }));
-        
-        alert(response.data?.message);
       }
     } catch (error) {
       console.error("Error liking post:", error);
@@ -130,7 +129,7 @@ const AllPosts = () => {
       setLoading(true);
       const response = await getPosts();
       const sortedPosts = response?.data?.posts.sort((a, b) => 
-        new Date(b.createdAt) - new Date(a.createdAt)
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setPosts(sortedPosts);
       setCurrentPage(1); 
@@ -139,6 +138,11 @@ const AllPosts = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const formatDate = (dateString) => {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
   const totalPages = Math.ceil(posts?.length / postsPerPage);
@@ -179,118 +183,176 @@ const AllPosts = () => {
   };
 
   if (error) {
-    return <div className="text-center mt-10 text-red-500">{error}</div>;
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center p-8 bg-white rounded-xl shadow-lg">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
+          <p className="text-gray-600">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <Header/>
-      <div className="max-w-7xl mx-auto p-6">
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="max-w-5xl mx-auto p-6">
         {loading && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <Loader />
           </div>
         )}
-        <h1 className="text-4xl font-semibold text-center mb-6 text-blue-800">All Posts</h1>
+        
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold text-center text-gray-800 mb-2">Community Posts</h1>
+          <p className="text-center text-gray-600">Join the conversation and share your thoughts</p>
+          {/* <Breadcrumbs /> */}
+        </div>
 
         {currentPosts?.length === 0 ? (
-          <p className="text-center text-gray-500">No posts available.</p>
+          <div className="text-center py-12">
+            <p className="text-xl text-gray-500">No posts available yet.</p>
+            <p className="text-gray-400 mt-2">Be the first to share something!</p>
+          </div>
         ) : (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {currentPosts.map((post) => (
               <div
                 key={post._id}
-                className="bg-white rounded-xl shadow-lg p-6 transition-all duration-300 ease-in-out hover:shadow-2xl"
+                className="bg-white rounded-xl shadow-sm p-6 transition-all duration-300 hover:shadow-md border border-gray-100"
               >
-                <h2 className="text-2xl font-bold mb-4 text-gray-800">{post.title}</h2>
-                <p className="text-gray-600 mb-4">
-                  {post?.content?.length > 100
-                    ? `${post.content.substring(0, 100)}...`
-                    : post.content}
-                </p>
-                <Link
-                  to={`/posts/${post._id}`}
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  Read More
-                </Link>
-
-                <div className="flex items-center space-x-6 text-gray-500 mt-4">
-                  <div 
-                    className="flex items-center space-x-1 cursor-pointer hover:text-blue-500"  
-                    onClick={() => handleLikeClick(post._id)}
-                  >
-                    {likedPosts[post._id] ? <FaThumbsUp className="text-blue-500" /> : <FaRegThumbsUp />}
-                    <span>Like ({postLikes[post._id] || 0})</span>
-                  </div>
-                  <div
-                    onClick={() => handleCommentClick(post._id)}
-                    className="flex items-center space-x-1 cursor-pointer hover:text-blue-500"
-                  >
-                    <FaRegComment />
-                    <span>Comment</span>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                    <FaRegClock className="text-gray-400" />
+                    <span>{formatDate(post.createdAt)}</span>
                   </div>
                 </div>
 
+                {/* Image Section */}
+                <div className="mb-4 rounded-lg overflow-hidden">
+                  {post.image ? (
+                    <img
+                      src={post.image}
+                      alt={post.title}
+                      className="w-full h-64 object-cover hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        e.target.src = "/api/placeholder/800/400";
+                        e.target.alt = "Post image placeholder";
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-64 bg-gray-100 flex items-center justify-center">
+                      {/* <FaImage className="text-gray-400 text-4xl" /> */}
+                      <img
+                        src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvaBsIxY1Sb0C23gCIm54B4PeNKmEW7i5_ug&s"
+                        alt="Post image placeholder"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                <h2 className="text-2xl font-semibold text-gray-800 mb-3 hover:text-blue-600 transition-colors">
+                  {post.title}
+                </h2>
+                
+                <p className="text-gray-600 leading-relaxed mb-4">
+                  {post?.content?.length > 150
+                    ? `${post.content.substring(0, 150)}...`
+                    : post.content}
+                </p>
+
+                <div className="flex justify-between items-center mb-6">
+                  <Link
+                    to={`/posts/${post._id}`}
+                    className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1 group"
+                  >
+                    <span>Read More</span>
+                    <span className="transform transition-transform group-hover:translate-x-1">→</span>
+                  </Link>
+                </div>
+
+                <div className="flex items-center space-x-6 pt-4 border-t border-gray-100">
+                  <button 
+                    onClick={() => handleLikeClick(post._id)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                      likedPosts[post._id] 
+                        ? 'text-blue-600 bg-blue-50'
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    {likedPosts[post._id] ? <FaThumbsUp /> : <FaRegThumbsUp />}
+                    <span>{postLikes[post._id] || 0} Likes</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleCommentClick(post._id)}
+                    className="flex items-center space-x-2 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+                  >
+                    <FaRegComment />
+                    <span>Comment</span>
+                  </button>
+                </div>
+
                 {commentId === post._id && (
-                  <div className="mt-4">
+                  <div className="mt-6 bg-gray-50 p-4 rounded-lg">
                     <textarea
                       value={commentText}
                       onChange={handleCommentTextChange}
                       rows="3"
-                      className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Write your comment..."
+                      className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      placeholder="Share your thoughts..."
                     />
                     <button
                       onClick={getcomments}
-                      className="mt-2 px-6 py-2 bg-blue-600 text-white rounded-lg"
+                      className="mt-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                      Submit Comment
+                      Post Comment
                     </button>
                   </div>
                 )}
 
-                <div className="mt-4">
-                  <button
-                    onClick={() => handleSeeAllComments(post._id)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-                  >
-                    See All Comments
-                  </button>
-                </div>
-
-                {allComments[post._id] && (
-                  <div className="mt-4 space-y-2">
+                {allComments[post._id] ? (
+                  <div className="mt-4 space-y-3">
                     {allComments[post._id].map((comment) => (
-                      <div key={comment._id} className="bg-gray-100 p-4 rounded-lg">
-                        <p className="text-sm text-gray-600">{comment.content}</p>
-                        <p className="text-xs text-gray-400">By User {comment.userId}</p>
+                      <div key={comment._id} className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-gray-700">{comment.content}</p>
+                        <p className="text-sm text-gray-500 mt-2">Posted by User {comment.userId}</p>
                       </div>
                     ))}
                   </div>
+                ) : (
+                  <button
+                    onClick={() => handleSeeAllComments(post._id)}
+                    className="mt-4 text-gray-600 hover:text-blue-600 text-sm font-medium"
+                  >
+                    View all comments
+                  </button>
                 )}
               </div>
             ))}
           </div>
         )}
 
-        <div className="flex justify-between items-center mt-8">
+        <div className="flex justify-center items-center mt-12 space-x-2">
           <button
             onClick={handlePreviousPage}
             disabled={currentPage === 1}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg disabled:opacity-50 hover:bg-blue-700 transition-all duration-200 ease-in-out"
+            className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Previous
           </button>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1">
             {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
               <button
                 key={page}
                 onClick={() => handlePageClick(page)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium ${
-                  page === currentPage ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600 hover:bg-blue-200'
-                } transition-all duration-200`}
+                className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                  page === currentPage 
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
               >
                 {page}
               </button>
@@ -300,7 +362,7 @@ const AllPosts = () => {
           <button
             onClick={handleNextPage}
             disabled={currentPage === totalPages}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg disabled:opacity-50 hover:bg-blue-700 transition-all duration-200 ease-in-out"
+            className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Next
           </button>

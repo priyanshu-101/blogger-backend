@@ -4,6 +4,7 @@ import { MoreVertical, Trash2 } from "lucide-react";
 import { getPostbyid, deletePost } from "../api/post";
 import Loader from "../spinner/Loader";
 import Header from "./Header";
+// import Breadcrumbs from "./BreadCrumbs";
 
 const Post = () => {
     const [posts, setPosts] = useState([]);
@@ -66,6 +67,7 @@ const Post = () => {
     return (
         <div>
             <Header />
+            {/* <Breadcrumbs /> */}
             <div className="container mx-auto p-6">
                 {loading && (
                     <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
