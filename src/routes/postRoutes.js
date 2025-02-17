@@ -51,12 +51,14 @@ router.post('/posts', authenticateToken, upload.single('image'), async (req, res
             return res.status(400).send({ message: 'Title and content are required' });
         }
 
+        const imagePath = req.file ? req.file.path.replace(/\\/g, "/") : null; 
+
         const post = new Post({
             title,
             content,
             author: req.user.id,
             tags: tags ? JSON.parse(tags) : [], 
-            image: req.file ? req.file.path : null, 
+            image: imagePath, 
             createdAt: new Date()
         });
 
