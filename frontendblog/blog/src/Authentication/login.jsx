@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { loginuser } from "../api/authapi";
+import { loginuser, forgetpassword } from "../api/authapi";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
-import Loader from "../spinner/Loader"; // Assuming Loader is a spinner component
+import Loader from "../spinner/Loader";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -39,6 +39,21 @@ const Login = () => {
       } finally {
         setLoading(false); 
       }
+    }
+  };
+
+  const handleForgotPassword = () => {
+    try{
+      setLoading(true);
+      const response = forgetpassword(email);
+      console.log(response.data);
+      if(response.status === 200){
+        alert('Password reset link sent to your email!');
+      }
+    }catch(err){
+      console.log(err);
+    }finally{
+      setLoading(false);
     }
   };
 
@@ -97,6 +112,16 @@ const Login = () => {
                 {showPassword ? <EyeOff className="text-gray-400" /> : <Eye className="text-gray-400" />}
               </div>
               {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                className="text-sm text-green-700 hover:text-green-800"
+              >
+                Forgot Password?
+              </button>
             </div>
 
             <button

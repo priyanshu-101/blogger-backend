@@ -7,6 +7,8 @@ import Profile from "./components/Profile";
 import AllPosts from "./components/AllPost";
 import CreatePost from "./components/CreatePost";
 import Post from "./components/Post";
+import ResetPassword from "./Authentication/ResetPassword";
+
 
 import { Link } from "react-router-dom";
 
@@ -24,6 +26,7 @@ const App = () => {
           path="/home/:id"
           element={storedUser?.id ? <Home /> : <Link to="/login" />}
         />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Profile />} />
