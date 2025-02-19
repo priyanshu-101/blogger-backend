@@ -8,6 +8,9 @@ import AllPosts from "./components/AllPost";
 import CreatePost from "./components/CreatePost";
 import Post from "./components/Post";
 import ResetPassword from "./Authentication/ResetPassword";
+import VerifyOTP from "./components/verifyotp";
+import { Navigate } from "react-router-dom";
+
 
 
 import { Link } from "react-router-dom";
@@ -18,14 +21,15 @@ const App = () => {
   return (
     <Router>
       <Routes>
-        <Route
-          path="/"
-          element={storedUser ? <Link to={`/home/${storedUser?.id}`} /> : <Link to="/login" />}
-        />
+      <Route
+  path="/"
+  element={storedUser ? <Navigate to={`/home/${storedUser?.id}`} replace /> : <Navigate to="/login" replace />}
+/>
         <Route
           path="/home/:id"
           element={storedUser?.id ? <Home /> : <Link to="/login" />}
         />
+        <Route path="/verify" element={<VerifyOTP />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />

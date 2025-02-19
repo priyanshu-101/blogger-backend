@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { MoreVertical, ChevronDown, Menu, X } from "lucide-react";
 import { logoutuser } from "../api/authapi";
@@ -11,8 +11,26 @@ const Header = () => {
     const [userDropdownOpen, setUserDropdownOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const userDropdownRef = useRef(null);
+    const dropdownRef = useRef(null);
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (userDropdownRef.current && !userDropdownRef.current.contains(event.target)) {
+                setUserDropdownOpen(false);
+            }
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     const toggleMobileMenu = () => {
         setMobileMenuOpen(!mobileMenuOpen);
@@ -22,7 +40,7 @@ const Header = () => {
 
     const handleLogout = async () => {
         try {
-            setLoading(true); 
+            setLoading(true);
             const response = await logoutuser(storedUser?.email);
             if (response && response.status === 200) {
                 localStorage.removeItem("user");
@@ -32,7 +50,7 @@ const Header = () => {
         } catch (err) {
             console.error("Logout failed:", err);
         } finally {
-            setLoading(false); 
+            setLoading(false);
             setMobileMenuOpen(false);
         }
     };
@@ -70,8 +88,8 @@ const Header = () => {
                         <Link to="/create" onClick={toggleMobileMenu} className="text-white text-xl">Create Post</Link>
                         <Link to="/profile" onClick={toggleMobileMenu} className="text-white text-xl">Profile</Link>
                         <Link to="/post" onClick={toggleMobileMenu} className="text-white text-xl">Post</Link>
-                        <button 
-                            onClick={handleLogout} 
+                        <button
+                            onClick={handleLogout}
                             className="text-white text-xl text-left"
                         >
                             Logout
@@ -106,12 +124,18 @@ const Header = () => {
 
             {mobileMenuOpen && <MobileNavLinks />}
 
-            <header className="bg-blue-600 text-white p-4 shadow-md">
+            <header className="bg-blue-600 text-white p-4 shadow-md relative">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
                     <div className="text-2xl font-semibold">
-                        <Link to="/" className="hover:text-blue-300 transition-colors">
-                            MyApp
-                        </Link>
+                        {storedUser ? (
+                            <Link to={`/home/${storedUser?.id}`} className="hover:text-blue-300 transition-colors">
+                                MyApp
+                            </Link>
+                        ) : (
+                            <Link to="/login" className="hover:text-blue-300 transition-colors">
+                                MyApp
+                            </Link>
+                        )}
                     </div>
 
                     <nav className="flex items-center space-x-6">
@@ -156,7 +180,7 @@ const Header = () => {
                         </ul>
 
                         {storedUser ? (
-                            <div className="relative hidden md:block">
+                            <div className="relative hidden md:block" ref={userDropdownRef}>
                                 <button
                                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                                     className="flex items-center space-x-2 text-white focus:outline-none"
@@ -166,13 +190,13 @@ const Header = () => {
                                 </button>
 
                                 {userDropdownOpen && (
-                                    <div className="absolute right-0 mt-2 w-40 bg-white text-black rounded-lg shadow-lg">
+                                    <div className="absolute right-0 mt-2 w-40 bg-white text-black rounded-lg shadow-lg z-40">
                                         <ul className="space-y-2 p-2">
                                             <li>
                                                 <Link
                                                     to="/profile"
                                                     className="block px-4 py-2 text-sm hover:bg-blue-100 rounded-lg"
-                                                    onClick={() => setUserDropdownOpen(false)} 
+                                                    onClick={() => setUserDropdownOpen(false)}
                                                 >
                                                     Profile
                                                 </Link>
@@ -189,7 +213,7 @@ const Header = () => {
                                                 <Link
                                                     to="/post"
                                                     className="block px-4 py-2 text-sm hover:bg-blue-100 rounded-lg"
-                                                    onClick={() => setUserDropdownOpen(false)} 
+                                                    onClick={() => setUserDropdownOpen(false)}
                                                 >
                                                     Post
                                                 </Link>
@@ -207,7 +231,7 @@ const Header = () => {
                                 )}
                             </div>
                         ) : (
-                            <div className="relative hidden md:block">
+                            <div className="relative hidden md:block" ref={dropdownRef}>
                                 <button
                                     onClick={() => setDropdownOpen(!dropdownOpen)}
                                     className="text-white focus:outline-none"
@@ -216,7 +240,7 @@ const Header = () => {
                                 </button>
 
                                 {dropdownOpen && (
-                                    <div className="absolute right-0 mt-2 w-40 bg-white text-black rounded-lg shadow-lg">
+                                    <div className="absolute right-0 mt-2 w-40 bg-white text-black rounded-lg shadow-lg z-40">
                                         <ul className="space-y-2 p-2">
                                             <li>
                                                 <Link
@@ -243,8 +267,8 @@ const Header = () => {
                         )}
 
                         <div className="md:hidden">
-                            <button 
-                                onClick={toggleMobileMenu} 
+                            <button
+                                onClick={toggleMobileMenu}
                                 className="text-white focus:outline-none"
                             >
                                 <Menu className="w-6 h-6" />
