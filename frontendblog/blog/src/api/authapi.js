@@ -56,3 +56,20 @@ export const logoutuser = async (email) => {
         return error.response.data;
     }
 }
+
+export const forgetpassword = async (email) => {
+    try {
+        const token = localStorage.getItem("accessToken");
+        const payload = {
+            "email": email,
+        }
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/forgot-password`, payload, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        return response;
+    } catch (error) {
+        return error.response.data;
+    }
+}
