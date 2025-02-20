@@ -1,7 +1,7 @@
-import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom"; 
-import Register from "./Authentication/Register"; 
-import Login from "./Authentication/Login";
+import {useState, useEffect} from "react";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Register from "./Authentication/Register";
+import Login from "./Authentication/login";
 import Home from "./components/Home";
 import Profile from "./components/Profile";
 import AllPosts from "./components/AllPost";
@@ -16,18 +16,26 @@ import { Navigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 const App = () => {
-  const storedUser = JSON.parse(localStorage.getItem("user"));
+  // const storedUser = JSON.parse(localStorage.getItem("user"));
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   return (
     <Router>
       <Routes>
-      <Route
-  path="/"
-  element={storedUser ? <Navigate to={`/home/${storedUser?.id}`} replace /> : <Navigate to="/login" replace />}
-/>
+        <Route
+          path="/"
+          element={user ? <Navigate to={`/home/${user?.id}`} replace /> : <Navigate to="/login" replace />}
+        />
         <Route
           path="/home/:id"
-          element={storedUser?.id ? <Home /> : <Link to="/login" />}
+          element={user?.id ? <Home /> : <Link to="/login" />}
         />
         <Route path="/verify" element={<VerifyOTP />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
