@@ -29,11 +29,7 @@ const Login = () => {
     if (validateForm()) {
       try {
         setLoading(true);
-        
-        // Check if there's an OTP verification in progress
         const otpEmail = sessionStorage.getItem("otpEmail");
-        
-        // If OTP verification is in progress and email doesn't match
         if (otpEmail && otpEmail !== email) {
           setErrors({ 
             email: `OTP verification is in progress for ${otpEmail}. Please use that email or complete the OTP verification first.`
@@ -46,8 +42,6 @@ const Login = () => {
         if (response.status === 200) {
           localStorage.setItem("accessToken", response.data.token);
           localStorage.setItem("user", JSON.stringify(response.data.user));
-          
-          // If login was successful and there was an OTP verification in progress, clear it
           if (otpEmail === email) {
             sessionStorage.removeItem("otpEmail");
           }
