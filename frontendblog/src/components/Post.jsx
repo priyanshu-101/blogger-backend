@@ -4,6 +4,7 @@ import { MoreVertical, Trash2, Heart, MessageCircle, Share2, Calendar, Clock } f
 import { getPostbyid, deletePost } from "../api/post";
 import Loader from "../spinner/Loader";
 import Header from "./Header";
+import PostModal from "../components/ReadMore";
 
 const Post = () => {
     const [posts, setPosts] = useState([]);
@@ -12,6 +13,8 @@ const Post = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [activeDropdown, setActiveDropdown] = useState(null);
+    const [selectedPost, setSelectedPost] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const storedUser = JSON.parse(localStorage.getItem("user"));
 
     const fetchUserPosts = async () => {
@@ -87,7 +90,7 @@ const Post = () => {
     return (
         <div className="bg-gray-50 min-h-screen pb-12">
             <Header />
-            
+
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-8">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-8">
                     <h2 className="text-3xl font-bold text-gray-800">My Posts</h2>
@@ -105,9 +108,9 @@ const Post = () => {
                     </div>
                 ) : posts?.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 bg-white rounded-lg shadow-md">
-                        <img 
-                            src="/api/placeholder/300/200?text=No+Posts+Found" 
-                            alt="No posts" 
+                        <img
+                            src="/api/placeholder/300/200?text=No+Posts+Found"
+                            alt="No posts"
                             className="mb-6 rounded-lg opacity-60"
                         />
                         <p className="text-gray-500 text-xl mb-6">You haven't created any posts yet.</p>
@@ -139,9 +142,9 @@ const Post = () => {
                                 <div className="p-6">
                                     <div className="flex justify-between items-start mb-4">
                                         <h3 className="text-xl font-semibold text-gray-800 line-clamp-2">{post.title}</h3>
-                                        
+
                                         <div className="relative">
-                                            <button 
+                                            <button
                                                 onClick={() => setActiveDropdown(
                                                     activeDropdown === post._id ? null : post._id
                                                 )}
@@ -149,16 +152,16 @@ const Post = () => {
                                             >
                                                 <MoreVertical className="w-5 h-5" />
                                             </button>
-                                            
+
                                             {activeDropdown === post._id && (
                                                 <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg z-10 py-1">
-                                                    <Link 
+                                                    <Link
                                                         to={`/edit-post/${post._id}`}
                                                         className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                     >
                                                         Edit Post
                                                     </Link>
-                                                    <button 
+                                                    <button
                                                         onClick={() => removePost(post._id)}
                                                         className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                                                     >
@@ -197,12 +200,16 @@ const Post = () => {
                                     </div>
 
                                     <div className="flex justify-between items-center pt-4 border-t border-gray-100">
-                                        <Link
-                                            to={`/posts/${post._id}`}
-                                            className="text-blue-600 hover:text-blue-700 font-medium text-sm hover:underline"
+                                        <button
+                                            onClick={() => {
+                                                setSelectedPost(post);
+                                                setIsModalOpen(true);
+                                            }}
+                                            className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1 group"
                                         >
-                                            Read More →
-                                        </Link>
+                                            <span>Read More</span>
+                                            <span className="transform transition-transform group-hover:translate-x-1">→</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -219,11 +226,11 @@ const Post = () => {
                         >
                             Previous
                         </button>
-                        
+
                         {Array.from({ length: totalPages }, (_, i) => i + 1)
-                            .filter(page => 
-                                page === 1 || 
-                                page === totalPages || 
+                            .filter(page =>
+                                page === 1 ||
+                                page === totalPages ||
                                 (page >= currentPage - 1 && page <= currentPage + 1)
                             )
                             .map((page, index, array) => (
@@ -233,18 +240,17 @@ const Post = () => {
                                     )}
                                     <button
                                         onClick={() => handlePageChange(page)}
-                                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                                            currentPage === page
-                                                ? 'bg-blue-600 text-white font-medium'
-                                                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                                        } transition-colors`}
+                                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${currentPage === page
+                                            ? 'bg-blue-600 text-white font-medium'
+                                            : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                                            } transition-colors`}
                                     >
                                         {page}
                                     </button>
                                 </React.Fragment>
                             ))
                         }
-                        
+
                         <button
                             onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                             disabled={currentPage === totalPages}
@@ -255,6 +261,14 @@ const Post = () => {
                     </div>
                 )}
             </div>
+            <PostModal
+                post={selectedPost}
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedPost(null);
+                }}
+            />
         </div>
     );
 };

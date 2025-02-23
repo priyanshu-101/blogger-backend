@@ -3,11 +3,14 @@ import { recommendpost } from '../api/post';
 import { BookOpen, Clock, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Spinner from '../spinner/Loader';
+import PostModal from "../components/ReadMore";
 
 const Recommendation = () => {
     const [recommendations, setRecommendations] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [selectedPost, setSelectedPost] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const storedUser = JSON.parse(localStorage.getItem("user"));
 
     useEffect(() => {
@@ -35,6 +38,12 @@ const Recommendation = () => {
         });
     };
 
+    const handleReadMore = (e, recommendation) => {
+        e.preventDefault(); // Prevent Link navigation
+        setSelectedPost(recommendation);
+        setIsModalOpen(true);
+    };
+
     return (
         <div className="max-w-7xl mx-auto p-6">
             <div className="flex items-center gap-3 mb-8">
@@ -57,13 +66,12 @@ const Recommendation = () => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {recommendations.map((recommendation, index) => (
-                        <Link 
-                            to={`/posts/${recommendation._id}`}
+                        <div
                             key={recommendation._id || index}
                             className="group bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col"
                         >
                             <div className="relative h-48 bg-gradient-to-r from-blue-100 to-blue-50">
-                                <img 
+                                <img
                                     src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSvaBsIxY1Sb0C23gCIm54B4PeNKmEW7i5_ug&s"
                                     alt="Post cover"
                                     className="w-full h-full object-cover"
@@ -81,20 +89,34 @@ const Recommendation = () => {
                                 </h2>
 
                                 <p className="text-gray-600 mb-4 flex-grow">
-                                    {recommendation.content?.length > 150 
-                                        ? `${recommendation.content.substring(0, 150)}...` 
+                                    {recommendation.content?.length > 150
+                                        ? `${recommendation.content.substring(0, 150)}...`
                                         : recommendation.content}
                                 </p>
 
-                                <div className="flex items-center text-blue-600 font-medium group-hover:gap-2 transition-all">
-                                    Read More 
-                                    <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-all" />
+                                <div className="flex items-center justify-between">
+                                    <button
+                                        onClick={(e) => handleReadMore(e, recommendation)}
+                                        className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1 group"
+                                    >
+                                        <span>Read More</span>
+                                        <span className="transform transition-transform group-hover:translate-x-1">→</span>
+                                    </button>
                                 </div>
                             </div>
-                        </Link>
+                        </div>
                     ))}
                 </div>
             )}
+            
+            <PostModal
+                post={selectedPost}
+                isOpen={isModalOpen}
+                onClose={() => {
+                    setIsModalOpen(false);
+                    setSelectedPost(null);
+                }}
+            />
         </div>
     );
 };
