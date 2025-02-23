@@ -6,6 +6,7 @@ import { createComments, getComment } from "../api/comment";
 import { likepost, getlikes } from "../api/likeapi";
 import Header from "./Header";
 import Loader from "../spinner/Loader";
+import PostModal from "./ReadMore";
 // import Breadcrumbs from "./BreadCrumbs";
 
 const AllPosts = () => {
@@ -18,6 +19,8 @@ const AllPosts = () => {
   const [allComments, setAllComments] = useState({});
   const [postLikes, setPostLikes] = useState({});
   const [likedPosts, setLikedPosts] = useState({});
+  const [selectedPost, setSelectedPost] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const postsPerPage = 10;
   const storedUser = JSON.parse(localStorage.getItem("user"));
 
@@ -26,7 +29,7 @@ const AllPosts = () => {
       try {
         setLoading(true);
         const response = await getPosts();
-        const sortedPosts = response?.data?.posts.sort((a, b) => 
+        const sortedPosts = response?.data?.posts.sort((a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         setPosts(sortedPosts);
@@ -68,7 +71,7 @@ const AllPosts = () => {
     try {
       setLoading(true);
       const response = await likepost(postId, storedUser?.id);
-      
+
       if (response) {
         setLikedPosts(prev => ({
           ...prev,
@@ -95,7 +98,7 @@ const AllPosts = () => {
         if (response) {
           alert("Comment added successfully!");
           setCommentText("");
-          await refreshPosts(); 
+          await refreshPosts();
         }
       } else {
         alert("Please enter a comment before submitting.");
@@ -128,11 +131,11 @@ const AllPosts = () => {
     try {
       setLoading(true);
       const response = await getPosts();
-      const sortedPosts = response?.data?.posts.sort((a, b) => 
+      const sortedPosts = response?.data?.posts.sort((a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setPosts(sortedPosts);
-      setCurrentPage(1); 
+      setCurrentPage(1);
     } catch (err) {
       console.error("Error refreshing posts:", err);
     } finally {
@@ -202,7 +205,7 @@ const AllPosts = () => {
             <Loader />
           </div>
         )}
-        
+
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-center text-gray-800 mb-2">Community Posts</h1>
           <p className="text-center text-gray-600">Join the conversation and share your thoughts</p>
@@ -251,11 +254,11 @@ const AllPosts = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <h2 className="text-2xl font-semibold text-gray-800 mb-3 hover:text-blue-600 transition-colors">
                   {post.title}
                 </h2>
-                
+
                 <p className="text-gray-600 leading-relaxed mb-4">
                   {post?.content?.length > 150
                     ? `${post.content.substring(0, 150)}...`
@@ -263,23 +266,25 @@ const AllPosts = () => {
                 </p>
 
                 <div className="flex justify-between items-center mb-6">
-                  <Link
-                    to={`/posts/${post._id}`}
+                  <button
+                    onClick={() => {
+                      setSelectedPost(post);
+                      setIsModalOpen(true);
+                    }}
                     className="text-blue-600 hover:text-blue-700 font-medium flex items-center space-x-1 group"
                   >
                     <span>Read More</span>
                     <span className="transform transition-transform group-hover:translate-x-1">→</span>
-                  </Link>
+                  </button>
                 </div>
 
                 <div className="flex items-center space-x-6 pt-4 border-t border-gray-100">
-                  <button 
+                  <button
                     onClick={() => handleLikeClick(post._id)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                      likedPosts[post._id] 
-                        ? 'text-blue-600 bg-blue-50'
-                        : 'text-gray-600 hover:bg-gray-50'
-                    }`}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${likedPosts[post._id]
+                      ? 'text-blue-600 bg-blue-50'
+                      : 'text-gray-600 hover:bg-gray-50'
+                      }`}
                   >
                     {likedPosts[post._id] ? <FaThumbsUp /> : <FaRegThumbsUp />}
                     <span>{postLikes[post._id] || 0} Likes</span>
@@ -348,11 +353,10 @@ const AllPosts = () => {
               <button
                 key={page}
                 onClick={() => handlePageClick(page)}
-                className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
-                  page === currentPage 
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${page === currentPage
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+                  }`}
               >
                 {page}
               </button>
@@ -368,7 +372,16 @@ const AllPosts = () => {
           </button>
         </div>
       </div>
+      <PostModal
+        post={selectedPost}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedPost(null);
+        }}
+      />
     </div>
+
   );
 };
 

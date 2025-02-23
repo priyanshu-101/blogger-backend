@@ -9,6 +9,7 @@ import CreatePost from "./components/CreatePost";
 import Post from "./components/Post";
 import ResetPassword from "./Authentication/ResetPassword";
 import VerifyOTP from "./components/verifyotp";
+import ReadMore from "./components/ReadMore";
 import { Navigate } from "react-router-dom";
 
 
@@ -39,6 +40,7 @@ const App = () => {
         />
         <Route path="/verify" element={<VerifyOTP />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/posts/:id" element={<ReadMore />} />
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/profile" element={<Profile />} />
