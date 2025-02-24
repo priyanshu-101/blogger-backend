@@ -27,7 +27,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - MONGODB_URI=mongodb://mongodb:27017/myapp
+      - MONGO_URI= mongodb+srv://prynsh:prynsh@prynsh.hot9x.mongodb.net/?retryWrites=true&w=majority&appName=prynsh
     depends_on:
       - mongodb
 
