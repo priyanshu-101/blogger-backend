@@ -1,19 +1,20 @@
-FROM node:20.18.0-alpine
+FROM node:20.18.0
 
 WORKDIR /app
 
-# Install build dependencies required for bcrypt
-RUN apk add --no-cache make gcc g++ python3
+# Install required build tools
+RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
-# Copy package files
+# Copy package files first (use Docker cache)
 COPY backend/package*.json ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies inside the container
+RUN npm install
 
-# Copy backend source
+# Copy the rest of your backend code
 COPY backend/ .
 
 EXPOSE 5000
 
-CMD ["npm", "start"]
+# Start the server
+CMD ["node", "server.js"]
