@@ -11,11 +11,14 @@ const privacy = require('./src/routes/privacyRoutes');
 const otpRoutes = require('./src/routes/otpRoutes');
 const likeRoutes = require('./src/routes/likeRoutes');
 const forgetroutes = require('./src/routes/forgetRoutes');
+const setupCronJobs = require('./src/utils/cronJobs');
 const cors = require('cors'); 
 
 dotenv.config(); 
 
 connectDB();
+
+setupCronJobs();
 
 const app = express();
 app.use(cors()); 
